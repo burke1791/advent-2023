@@ -1,26 +1,15 @@
 %define api.pure true
+%parse-param { struct Game** g }
 
 %{
 
-typedef struct SetList {
-  int numSets;
-  Set** sets;
-};
+#include <stdarg.h>
+#include <stdlib.h>
+#include <stdio.h>
 
-typedef struct Cube {
-  char* color;
-  int count;
-};
+#include "game.h"
 
-typedef struct Set {
-  int numCubes;
-  Cube** cubes;
-};
-
-typedef struct Game {
-  int gameId;
-  SetList* sets;
-};
+void yyerror(Game** g, char* s, ...);
 
 %}
 
@@ -29,82 +18,81 @@ typedef struct Game {
   int i;
 
   struct Game* game;
+  struct List* list;
   struct Set* set;
-  struct SetList* setlist;
   struct Cube* cube;
 }
 
-%token <str> GAME
+%token GAME
 
 %token <i> NUMBER
+%token <str> COLOR
 
-%token <str> RED GREEN BLUE
-
+%type <game> game
+%type <list> set_list cube_list
 %type <set> set
 %type <cube> cube
-%type <setlist> set_list
+
+%start result
 
 %%
 
-game: GAME num ':' set_list {
-      Game* g = malloc(sizeof(Game));
-      g->gameId = $2;
-      g->sets = $4;
+result: game {
+      *g = $1;
+      YYACCEPT;
+    }
+  ;
 
-      return g;
+game: GAME NUMBER ':' set_list {
+      printf("parsing game\n");
+      Game* game = malloc(sizeof(Game));
+      game->gameId = $2;
+      game->sets = $4;
+
+      $$ = game;
     }
   ;
 
 set_list: set {
-      SetList* sl = malloc(sizeof(SetList));
-      sl->numSets = 1;
-      sl->sets = malloc(sizeof(void*));
-      sl->sets[0] = $1;
-
-      $$ = sl;
+      List* l = new_list(SET, $1);
+      $$ = l;
     }
   | set_list ';' set {
-      $1->sets = realloc($1->sets, sizeof(void*) * ($1->numSets + 1));
-      $1->sets[$1->numSets] = $3;
-      $1->numSets++;
-
-      $$ = $1;
+      list_append($1, $3);
     }
   ;
 
-set: cube {
-      Set* s = malloc(sizeof(Set));
-      s->numCubes = 1;
-      s->cubes = malloc(sizeof(void*));
-      s->cubes[0] = $1;
-    }
-  | set ',' cube {
-      $1->cubes = realloc($1->cubes, sizeof(void*) * ($1->numCubes + 1));
-      $1->cubes[$1->numCubes] = $3;
-      $1->numCubes++;
+set: cube_list {
+      printf("parsing set\n");
+      Set* s = new_set();
+      s->cubes = $1;
 
-      $$ = $1;
+      $$ = s;
     }
   ;
 
-cube: num color {
-      Cube* c = malloc(sizeof(Cube));
-      c->count = $1;
-      c->color = $2;
-
-      $$ = c;
+cube_list: cube {
+      List* l = new_list(CUBE, $1);
+      $$ = l;
+    }
+  | cube_list ',' cube {
+      list_append($1, $3);
     }
   ;
 
-num: NUMBER
-
-color: RED |
-  GREEN |
-  BLUE
-
+cube: NUMBER COLOR {
+      $$ = new_cube($1, $2);
+    }
+  ;
 
 %%
 
-int main(int argc, char** argv) {
-  
+void yyerror(Game** g, char* s, ...) {
+  va_list ap;
+  va_start(ap, s);
+
+  fprintf(stderr, "error: ");
+  vfprintf(stderr, s, ap);
+  fprintf(stderr, "\n");
 }
+
