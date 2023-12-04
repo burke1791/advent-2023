@@ -2,8 +2,9 @@
 #define GAME_H
 
 typedef enum ListType {
-  SET,
-  CUBE
+  L_SET,
+  L_CUBE,
+  L_GAME
 } ListType;
 
 typedef struct ListItem {
@@ -42,5 +43,9 @@ void free_game(Game* g);
 void free_set(Set* s);
 void free_cube(Cube* c);
 void free_list(List* l);
+
+int get_cube_count(List* cubes, char* color);
+
+void print_list(List* l);
 
 #endif /* GAME_H */

@@ -1,5 +1,5 @@
 %define api.pure true
-%parse-param { struct Game** g }
+%parse-param { struct List** l }
 
 %{
 
@@ -9,7 +9,7 @@
 
 #include "game.h"
 
-void yyerror(Game** g, char* s, ...);
+void yyerror(List** l, char* s, ...);
 
 %}
 
@@ -23,13 +23,13 @@ void yyerror(Game** g, char* s, ...);
   struct Cube* cube;
 }
 
-%token GAME
+%token GAME NEWLINE
 
 %token <i> NUMBER
 %token <str> COLOR
 
 %type <game> game
-%type <list> set_list cube_list
+%type <list> set_list cube_list game_list
 %type <set> set
 %type <cube> cube
 
@@ -37,15 +37,23 @@ void yyerror(Game** g, char* s, ...);
 
 %%
 
-result: game {
-      *g = $1;
+result: game_list {
+      *l = $1;
       YYACCEPT;
     }
   ;
 
+game_list: game {
+      List* l = new_list(L_GAME, $1);
+      $$ = l;
+    }
+  | game_list NEWLINE game {
+      list_append($1, $3);
+    }
+  ;
+
 game: GAME NUMBER ':' set_list {
-      printf("parsing game\n");
-      Game* game = malloc(sizeof(Game));
+      Game* game = new_game();
       game->gameId = $2;
       game->sets = $4;
 
@@ -54,7 +62,7 @@ game: GAME NUMBER ':' set_list {
   ;
 
 set_list: set {
-      List* l = new_list(SET, $1);
+      List* l = new_list(L_SET, $1);
       $$ = l;
     }
   | set_list ';' set {
@@ -63,7 +71,6 @@ set_list: set {
   ;
 
 set: cube_list {
-      printf("parsing set\n");
       Set* s = new_set();
       s->cubes = $1;
 
@@ -72,7 +79,7 @@ set: cube_list {
   ;
 
 cube_list: cube {
-      List* l = new_list(CUBE, $1);
+      List* l = new_list(L_CUBE, $1);
       $$ = l;
     }
   | cube_list ',' cube {
@@ -87,7 +94,7 @@ cube: NUMBER COLOR {
 
 %%
 
-void yyerror(Game** g, char* s, ...) {
+void yyerror(List** l, char* s, ...) {
   va_list ap;
   va_start(ap, s);
 

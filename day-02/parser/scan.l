@@ -21,6 +21,8 @@ BLUE    { yylval->str = strdup(yytext); return COLOR; }
 
 [;:,]     { return yytext[0]; }
 
+[\r\n]    { return NEWLINE; }
+
 [ \t\n]   /* whitespace */
 .   /* everything else */
 

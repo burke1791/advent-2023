@@ -5,7 +5,7 @@ CC = gcc
 CFLAGS = -I../include -fsanitize=address -fsanitize=undefined -static-libasan -g
 
 BUILD_DIR = ../../build
-TARGET_EXEC = d2p1
+TARGET_EXEC = d2p2
 
 $(BUILD_DIR)/$(TARGET_EXEC): lex.yy.o gram.tab.o main.c ../common/game.c
 	mkdir -p $(BUILD_DIR)
