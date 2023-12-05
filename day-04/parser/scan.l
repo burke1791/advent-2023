@@ -10,6 +10,7 @@
 %%
 
 CARD    { return CARD; }
+[\r\n]    { return NEWLINE; }
 
 [0-9]+  { yylval->i = atoi(yytext); return NUMBER; }
 
