@@ -64,18 +64,20 @@ void free_list(List* l) {
   free(l);
 }
 
-Number* new_number(int row, int col, int val) {
+Number* new_number(int row, int startCol, int endCol, int val) {
   Number* n = malloc(sizeof(Number));
   n->row = row;
-  n->col = col;
+  n->startCol = startCol;
+  n->endCol = endCol;
   n->val = val;
   return n;
 }
 
-Symbol* new_symbol(int row, int col) {
+Symbol* new_symbol(int row, int col, char sym) {
   Symbol* s = malloc(sizeof(Symbol));
   s->row = row;
   s->col = col;
+  s->sym = sym;
   return s;
 }
 
@@ -86,7 +88,7 @@ CharType parse_char(char c) {
 }
 
 void print_number(Number* n) {
-  printf("Number: %d | {%d, %d}\n", n->val, n->row, n->col);
+  printf("Number: %d | {%d, %d}\n", n->val, n->row, n->startCol);
 }
 
 void print_symbol(Symbol* s) {
@@ -110,7 +112,8 @@ void print_list(List* l) {
 }
 
 static void append_num(List* n, int row, int col, int totalNum) {
-  Number* num = new_number(row, col, totalNum);
+  int startCol = col - num_digits(totalNum) + 1;
+  Number* num = new_number(row, startCol, col, totalNum);
   list_append(n, num);
 }
 
@@ -146,7 +149,7 @@ void map_engine(FILE* fp, List* s, List* n) {
         isNum = true;
         break;
       case C_SYM:
-        Symbol* sym = new_symbol(row, col);
+        Symbol* sym = new_symbol(row, col, c);
         list_append(s, sym);
         // fallthrough
       case C_REG:
@@ -170,21 +173,21 @@ int num_digits(int val) {
 }
 
 bool is_adjacent(Symbol* s, Number* n) {
-  int startCol = n->col - num_digits(n->val) + 1;
+  // int startCol = n->col - num_digits(n->val) + 1;
 
   // starting at {row-1, startCol - 1}, check for a symbol clockwise
   // we're not going to optimize away the negative coordinates
   int row = n->row - 1;
-  for (int j = startCol - 1; j <= n->col + 1; j++) {
+  for (int j = n->startCol - 1; j <= n->endCol + 1; j++) {
     if (s->row == row && s->col == j) return true;
   }
   row++;
 
-  if (s->row == row && s->col == startCol - 1) return true;
-  if (s->row == row && s->col == n->col + 1) return true;
+  if (s->row == row && s->col == n->startCol - 1) return true;
+  if (s->row == row && s->col == n->endCol + 1) return true;
   row++;
 
-  for (int j = startCol - 1; j <= n->col + 1; j++) {
+  for (int j = n->startCol - 1; j <= n->endCol + 1; j++) {
     if (s->row == row && s->col == j) return true;
   }
 

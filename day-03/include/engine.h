@@ -29,23 +29,23 @@ typedef enum CharType {
 typedef struct Symbol {
   int row;
   int col;
+  char sym;
 } Symbol;
 
 typedef struct Number {
   int row;
-  int col;
+  int startCol;
+  int endCol;
   int val;
 } Number;
 
 void map_engine(FILE* fp, List* s, List* n);
 
-Number* new_number(int row, int col, int val);
-Symbol* new_symbol(int row, int col);
+Number* new_number(int row, int startCol, int endCol, int val);
+Symbol* new_symbol(int row, int col, char sym);
 
 
 List* new_list(ListType lt);
-Symbol* new_symbol(int row, int col);
-Number* new_number(int row, int col, int val);
 
 CharType parse_char(char c);
 
