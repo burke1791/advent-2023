@@ -45,7 +45,7 @@ int compute_total_points(List* cards) {
 int main(int argc, char** argv) {
   if (argc != 2) {
     printf("Please provide the input file\n");
-    printf("E.g. d3p1 [input_file]\n");
+    printf("E.g. d4p1 [input_file]\n");
 
     return 0;
   }

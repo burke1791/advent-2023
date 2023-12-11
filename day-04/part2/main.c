@@ -56,7 +56,7 @@ int compute_num_cards(List* cards) {
 int main(int argc, char** argv) {
   if (argc != 2) {
     printf("Please provide the input file\n");
-    printf("E.g. d3p2 [input_file]\n");
+    printf("E.g. d4p2 [input_file]\n");
 
     return 0;
   }

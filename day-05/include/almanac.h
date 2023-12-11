@@ -1,9 +1,10 @@
-#ifndef MAP_H
-#define MAP_H
+#ifndef ALMANAC_H
+#define ALMANAC_H
 
 typedef enum ListType {
   L_NUM,
-  L_MAP
+  L_MAP,
+  L_SEED
 } ListType;
 
 typedef struct ListItem {
@@ -35,12 +36,21 @@ typedef struct Map {
   int length;
 } Map;
 
+typedef struct Seed {
+  int seedId;
+  int location;
+} Seed;
+
 List* new_list(ListType lt, void* ptr);
 List* new_list_int(ListType lt, int i);
 void list_append(List* l, void* ptr);
 void list_append_int(List* l, int i);
 void free_list(List* l);
 
+Almanac* new_almanac();
+Map* new_map(int sourceStart, int destStart, int length);
+
+void free_almanac(Almanac* a);
 
 
-#endif /* MAP_H */
+#endif /* ALMANAC_H */
